@@ -35,6 +35,9 @@ int server_handshake(int *to_client) {
 
   *to_client = fds[0];
 
+  char * response = calloc(200, 1);
+  read(fds[0], response, 200);
+  printf("%s\n", response);
   close(fds[0]);
 
   return fds[1];
@@ -62,7 +65,6 @@ int client_handshake(int *to_server) {
 
   fds[0] = open(myfifo1, O_WRONLY);
   write(fds[0], myfifo2, 200);
-  close(fds[0]);
 
   fds[1] = open(myfifo2, O_RDONLY);
   char * hi = calloc(1, 2);
@@ -71,7 +73,8 @@ int client_handshake(int *to_server) {
   remove(myfifo2);
   close(fds[1]);
 
-  write(fds[0], "I'M DONE", 200);
+  char * r = "I'M DONE";
+  write(fds[0], r, 200);
 
   *to_server = fds[0];
   close(fds[0]);
