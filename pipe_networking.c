@@ -65,7 +65,7 @@ int client_handshake(int *to_server) {
   close(fds[0]);
 
   fds[1] = open(myfifo2, O_RDONLY);
-  char * hi = malloc(2);
+  char * hi = calloc(1, 2);
   read(fds[1], hi, 2);
   printf("%s\n", hi);
   remove(myfifo2);
