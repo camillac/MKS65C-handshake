@@ -27,15 +27,14 @@ int server_handshake(int *to_client) {
   read(fds[0], myfifo2, 200);
   printf("Recieved downpipe name...\n");
   remove(myfifo1);
-  close(fds[0]);
 
   fds[1] = open(myfifo2, O_WRONLY);
   write(fds[1], "hi", 2);
 
-  *to_client = fds[0];
   close(fds[1]);
 
-  fds[0] = open(myfifo2, O_RDONLY);
+  *to_client = fds[0];
+
   close(fds[0]);
 
   return fds[1];
@@ -69,9 +68,9 @@ int client_handshake(int *to_server) {
   char * hi = malloc(2);
   read(fds[1], hi, 2);
   printf("%s\n", hi);
+  remove(myfifo2);
   close(fds[1]);
 
-  fds[0] = open(myfifo1, O_WRONLY);
   write(fds[0], "I'M DONE", 200);
 
   *to_server = fds[0];
