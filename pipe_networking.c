@@ -13,34 +13,33 @@
 int server_handshake(int *to_client) {
 
   int fds[2];
-  char * myfifo1 = "/tmp/client_to_server";
+  char * myfifo0 = "/tmp/client_to_server";
   // char * myfifo2 = "/tmp/downstream";
 
-  int m = mkfifo(myfifo1, 0644);
-  if (m < 0){
+  printf("Waiting for Client...\n");
+
+  int fifo_status = mkfifo(myfifo0, 0644);
+  if (fifo_status < 0){
     printf("Error: %s\n", strerror(errno));
   }
 
-  fds[0] = open(myfifo1, O_RDONLY);
+  fds[0] = open(myfifo0, O_RDONLY);
 
-  char * myfifo2 = malloc(200);
-  read(fds[0], myfifo2, 200);
-  printf("Recieved downpipe name...\n");
-  remove(myfifo1);
+  char * myfifo1 = malloc(200);
+  read(fds[0], myfifo1, 200);
+  printf("Recieved server_to_client Pipe Name...\n");
+  remove(myfifo0);
 
-  fds[1] = open(myfifo2, O_WRONLY);
-  write(fds[1], "hi", 2);
+  fds[1] = open(myfifo1, O_WRONLY);
+  write(fds[1], "Connection with Server Successful", 200);
 
-  close(fds[1]);
+  *to_client = fds[1];
 
-  *to_client = fds[0];
-
-  char * response = calloc(200, 1);
+  char * response = calloc(200, sizeof(char));
   read(fds[0], response, 200);
   printf("%s\n", response);
-  close(fds[0]);
 
-  return fds[1];
+  return fds[0];
 }
 
 
@@ -55,29 +54,27 @@ int server_handshake(int *to_client) {
   =========================*/
 int client_handshake(int *to_server) {
   int fds[2];
-  char * myfifo1 = "/tmp/client_to_server";
-  char * myfifo2 = "/tmp/server_to_client";
+  char * myfifo0 = "/tmp/client_to_server";
+  char * myfifo1 = "/tmp/server_to_client";
 
-  int m = mkfifo(myfifo2, 0644);
-  if (m < 0){
+  int fifo_status = mkfifo(myfifo1, 0644);
+  if (fifo_status < 0){
     printf("Error: %s\n", strerror(errno));
   }
 
-  fds[0] = open(myfifo1, O_WRONLY);
-  write(fds[0], myfifo2, 200);
+  fds[0] = open(myfifo0, O_WRONLY);
+  write(fds[0], myfifo1, 200);
 
-  fds[1] = open(myfifo2, O_RDONLY);
-  char * hi = calloc(1, 2);
-  read(fds[1], hi, 2);
-  printf("%s\n", hi);
-  remove(myfifo2);
-  close(fds[1]);
+  fds[1] = open(myfifo1, O_RDONLY);
+  char * message = calloc(sizeof(char), 200);
+  read(fds[1], message, 200);
+  printf("%s\n", message);
+  remove(myfifo1);
 
-  char * r = "I'M DONE";
-  write(fds[0], r, 200);
+  char * response = "Connection with Client Successful";
+  write(fds[0], response, 200);
 
   *to_server = fds[0];
-  close(fds[0]);
 
 
   return fds[1];
