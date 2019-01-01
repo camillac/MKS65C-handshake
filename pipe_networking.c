@@ -14,14 +14,13 @@ int server_handshake(int *to_client) {
 
   int fds[2];
   char * myfifo0 = "/tmp/client_to_server";
-  // char * myfifo2 = "/tmp/downstream";
-
-  printf("Waiting for Client...\n");
 
   int fifo_status = mkfifo(myfifo0, 0644);
   if (fifo_status < 0){
     printf("Error: %s\n", strerror(errno));
   }
+
+  printf("Waiting for Client...\n");
 
   fds[0] = open(myfifo0, O_RDONLY);
 
