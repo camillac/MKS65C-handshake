@@ -17,8 +17,6 @@ int main() {
 
   from_client = server_handshake( &to_client );
 
-  // pid_t parent = getpid();
-
   int pid = fork();
 
   while(1){
